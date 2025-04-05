@@ -12,7 +12,7 @@ A simple Express.js application that demonstrates WebSocket communication betwee
 
 ## Prerequisites
 
-- Node.js (v12 or higher)
+- Node.js (v18 or higher)
 - npm (comes with Node.js)
 - Tilda CLI (for building and deployment)
 
