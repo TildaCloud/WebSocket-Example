@@ -1,0 +1,18 @@
+{
+  "name": "websocket-example",
+  "version": "1.0.0",
+  "main": "app/server.js",
+  "scripts": {
+    "start": "node app/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tilda build --projectDir $PWD --serverDir $PWD/app --serverEntryFile $PWD/app/server.js --rootStaticDir $PWD/public"
+  },
+  "keywords": ["websocket", "express", "example"],
+  "author": "",
+  "license": "ISC",
+  "description": "An example Express app with WebSocket functionality",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0"
+  }
+}

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Echo Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .message-container {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .received {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+        .sent {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            text-align: right;
+        }
+        .system {
+            background-color: #fff3e0;
+            border-left: 4px solid #FF9800;
+            font-style: italic;
+        }
+        .input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+        #messageInput {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .connected {
+            color: #4CAF50;
+        }
+        .disconnected {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Echo Example</h1>
+    
+    <div class="container">
+        <div class="status disconnected" id="connectionStatus">Disconnected</div>
+        
+        <div class="message-container" id="messages"></div>
+        
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+            <button id="sendButton" disabled>Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const messagesContainer = document.getElementById('messages');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const connectionStatus = document.getElementById('connectionStatus');
+            
+            let socket;
+            
+            // Function to add a message to the UI
+            function addMessage(message, type) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', type);
+                messageElement.textContent = message;
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Initialize WebSocket connection
+            function connectWebSocket() {
+                // Get the host from the current URL
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws`;
+                
+                addMessage('Connecting to WebSocket server...', 'system');
+                
+                // Create WebSocket connection
+                socket = new WebSocket(wsUrl);
+                
+                // Connection opened
+                socket.addEventListener('open', (event) => {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.classList.remove('disconnected');
+                    connectionStatus.classList.add('connected');
+                    
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    
+                    addMessage('Connected to WebSocket server', 'system');
+                });
+                
+                // Listen for messages
+                socket.addEventListener('message', (event) => {
+                    addMessage(event.data, 'received');
+                });
+                
+                // Connection closed
+                socket.addEventListener('close', (event) => {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.classList.remove('connected');
+                    connectionStatus.classList.add('disconnected');
+                    
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+                    
+                    addMessage('Disconnected from server', 'system');
+                    
+                    // Try to reconnect after 5 seconds
+                    setTimeout(connectWebSocket, 5000);
+                });
+                
+                // Connection error
+                socket.addEventListener('error', (event) => {
+                    addMessage('Connection error', 'system');
+                    console.error('WebSocket error:', event);
+                });
+            }
+            
+            // Send message function
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message && socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(message);
+                    addMessage(`You: ${message}`, 'sent');
+                    messageInput.value = '';
+                }
+            }
+            
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            
+            messageInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Start connection
+            connectWebSocket();
+        });
+    </script>
+</body>
+</html>
