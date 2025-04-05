@@ -2,6 +2,8 @@
 
 A simple Express.js application that demonstrates WebSocket communication between a client and server. The server echoes back any messages sent by the client.
 
+This example is built for [Tilda's WebSocket support](https://tilda.net/blog/websocket-support/).
+
 ## Features
 
 - Express.js web server
